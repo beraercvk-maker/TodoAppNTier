@@ -14,7 +14,7 @@ namespace TodoAppNTier.DataAccess.UnitofWork
             _context = context;
         }
 
-        public IRepository<T> GetRepository<T>() where T : class, new()
+        public IRepository<T> GetRepository<T>() where T : BaseEntity
         {
             return new Repository<T>(_context);
         }

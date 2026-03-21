@@ -6,7 +6,7 @@ namespace TodoAppNTier.DataAccess.UnitofWork
 {
     public interface IUow 
     {
-        IRepository<T> GetRepository <T>() where T : class, new();
+        IRepository<T> GetRepository <T>() where T : BaseEntity;
         Task SaveChanges();
     }
 }

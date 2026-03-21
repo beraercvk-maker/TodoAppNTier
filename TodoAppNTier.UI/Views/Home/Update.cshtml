@@ -1,0 +1,51 @@
+@using TodoAppNTier.Dtos.WorkUpdateDtos
+@model WorkUpdateDto 
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Görevi Güncelle - Todo App</title> 
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+</head>
+<body class="bg-light"> 
+   
+    <div class="container my-5">
+        <div class="row">
+            <div class="col-md-6 offset-md-3">
+                
+                <div class="card shadow border-0 rounded-3">
+                    <div class="card-header bg-warning text-dark text-center py-3">
+                        <h4 class="mb-0 fw-bold">Görevi Güncelle</h4>
+                    </div>
+                    
+                    <div class="card-body p-4">
+                        <form asp-action="Update" asp-controller="Home" method="post">
+                            
+                            <input type="hidden" asp-for="Id" />
+
+                            <div class="mb-4">
+                                <label asp-for="Definition" class="form-label fw-semibold">Görev Tanımı</label>
+                                <input asp-for="Definition" class="form-control form-control-lg" />
+                                <span asp-validation-for="Definition" class="text-danger small"></span>
+                            </div>
+                          
+                            <div class="form-check form-switch mb-5 fs-5">
+                                <input asp-for="IsCompleted" class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheck">
+                                <label class="form-check-label text-muted" for="flexSwitchCheck">
+                                    Bu görev tamamlandı mı?
+                                </label>
+                            </div>
+
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a asp-action="Index" asp-controller="Home" class="btn btn-outline-secondary px-4">Vazgeç</a>
+                                <button type="submit" class="btn btn-warning px-5 fw-bold text-dark">Değişiklikleri Kaydet</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
+

@@ -50,23 +50,22 @@ namespace TodoAppNTier.Services.WorkService
             return workList; 
         }
 
-        public async Task<WorkListDto> GetById(object id) 
+        public async Task<WorkListDto> GetById(int id)
 {
-    var work = await _uow.GetRepository<Work>().GetById(id);
+    var work = await _uow.GetRepository<Work>().GetByFilter(x => x.Id == id);
     
-    // 3. Null kontrolü yapıldı. Veri yoksa program çökmesin, geriye boş/null dönsün.
-    if (work == null)
+    return new()
     {
-        return null; 
-    }
-    
-    return new () 
-    {
-        Id = work.Id, 
+        
         Definition = work.Definition,
         IsCompleted = work.IsCompleted
-    }; // 2. Noktalı virgül eklendi
+    };
+   
+    
 }
+
+
+      
 
         public async Task Remove(object id)
         {

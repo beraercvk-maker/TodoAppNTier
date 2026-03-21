@@ -5,7 +5,7 @@ using TodoAppNTier.Entities.Concrete;
 
 namespace TodoAppNTier.DataAccess.Repositories
 {
-    public class Repository<T> : IRepository<T> where T : class, new()
+    public class Repository<T> : IRepository<T> where T : BaseEntity
     {
         private readonly TodoContext _context;
         private readonly DbSet<T> _dbSet;
@@ -33,7 +33,10 @@ namespace TodoAppNTier.DataAccess.Repositories
 
         public void Update(T entity)
         {
-            _context.Set<T>().Update(entity);
+            var updatedEntity = _context.Set<T>().Find(entity.Id);
+            _context.Entry(updatedEntity).CurrentValues.SetValues(entity);
+           
+
         }
 
         public void Remove(T entity)
@@ -50,7 +53,7 @@ namespace TodoAppNTier.DataAccess.Repositories
 
         void IRepository<T>.Update(T entity)
         {
-            throw new NotImplementedException();
+            _context.Set<T>().Update(entity);
         }
 
         void IRepository<T>.Remove(T entity)

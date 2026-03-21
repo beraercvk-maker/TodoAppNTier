@@ -19,6 +19,7 @@
                 <tr>
                     <th>Görev Tanımı</th>
                     <th>Durum</th>
+                    <th>İşlem</th>
                 </tr>
             </thead>
             <tbody>
@@ -39,13 +40,18 @@
                                     <span class="badge bg-warning text-dark">Devam Ediyor</span>
                                 }
                             </td>
+                            <td>
+                                <a asp-action="Update" asp-controller="Home" asp-route-id="@work.Id" class="btn btn-sm btn-outline-primary">Düzenle</a>
+                                <a asp-action="Delete" asp-controller="Home" asp-route-id="@work.Id" class="btn btn-sm btn-outline-danger">Sil</a>
+                            </td>
+
                         </tr>
                     } 
                 }
                 else
                 {
                     <tr>
-                        <td colspan="2" class="text-center text-muted">
+                        <td colspan="3" class="text-center text-muted">
                             Henüz bir görev eklenmemiş.
                         </td>
                     </tr>

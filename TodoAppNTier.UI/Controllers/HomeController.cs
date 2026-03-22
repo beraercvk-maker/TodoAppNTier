@@ -47,21 +47,15 @@ public class HomeController : Controller
     }
 
 
-        public async Task<IActionResult> Update(int id)
-        {
-            var dto = await _workService.GetById<WorkUpdateDto>(id);
-           
-            
-                return View(new WorkUpdateDto
-                {
-                    Id = dto.Id,
-                    Definition = dto.Definition,
-                    IsCompleted = dto.IsCompleted
-                });
-            
-    
-           
-        }
+       [HttpGet]
+    public async Task<IActionResult> Update(int id)
+    {
+        // 1. Service katmanı AutoMapper sayesinde bize zaten içi dolu, makyajlı bir DTO gönderiyor.
+        var dto = await _workService.GetById<WorkUpdateDto>(id);
+        
+        // 2. Biz de o kutuyu hiç bozmadan doğrudan ekrana (View'a) basıyoruz!
+        return View(dto);
+    }
 
         [HttpPost]
 

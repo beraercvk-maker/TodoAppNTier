@@ -8,12 +8,11 @@ namespace TodoAppNTier.DataAccess.Repositories
     public class Repository<T> : IRepository<T> where T : BaseEntity
     {
         private readonly TodoContext _context;
-        private readonly DbSet<T> _dbSet;
+        // _dbSet tanımını kullanmadığın için sildim, kod daha temiz oldu!
 
         public Repository(TodoContext context)
         {
             _context = context;
-            
         }
 
         public async Task<List<T>> GetAll()
@@ -31,43 +30,34 @@ namespace TodoAppNTier.DataAccess.Repositories
           await _context.Set<T>().AddAsync(entity); 
         }
 
-        public void Update(T entity)
+        // İŞTE YENİ, PERFORMANSLI VE KISACIK UPDATE METODUMUZ!
+        public void Update(T entity, T unchanged)
         {
-            var updatedEntity = _context.Set<T>().Find(entity.Id);
-            _context.Entry(updatedEntity).CurrentValues.SetValues(entity);
-           
-
+            // Artık kendi içimizde Find() diyerek veritabanına fazladan SELECT atmıyoruz!
+            // Service'in bize bulup getirdiği "unchanged" (orijinal) verinin üzerine,
+            // kullanıcının gönderdiği "entity" (yeni) veriyi akıllıca yapıştırıyoruz.
+            _context.Entry(unchanged).CurrentValues.SetValues(entity);
         }
 
         public void Remove(object id)
         {
             var deletedEntity = _context.Set<T>().Find(id);
-            if (deletedEntity != null) // Silinecek var mı kontrolü yapıldı
+            if (deletedEntity != null)
             {
                 _context.Set<T>().Remove(deletedEntity);
             }
         }
 
-      public async Task<T> GetByFilter(Expression<Func<T, bool>> filter, bool asNoTracking = false)
-{
-    return asNoTracking 
-        ? await _context.Set<T>().AsNoTracking().FirstOrDefaultAsync(filter)
-        : await _context.Set<T>().FirstOrDefaultAsync(filter);
-}
-
-        void IRepository<T>.Update(T entity)
+        public void Remove(T entity)
         {
-            _context.Set<T>().Update(entity);
+            _context.Set<T>().Remove(entity);
         }
 
-        void IRepository<T>.Remove(object id)
+        public async Task<T> GetByFilter(Expression<Func<T, bool>> filter, bool asNoTracking = false)
         {
-            var deletedEntity = _context.Set<T>().Find(id);
-            if (deletedEntity != null) // Silinecek var mı kontrolü yapıldı
-            {
-                _context.Set<T>().Remove(deletedEntity);
-            }
-           
+            return asNoTracking 
+                ? await _context.Set<T>().AsNoTracking().FirstOrDefaultAsync(filter)
+                : await _context.Set<T>().FirstOrDefaultAsync(filter);
         }
 
         public IQueryable<T> GetQuery()

@@ -9,6 +9,10 @@ using TodoAppNTier.Services.WorkService;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Logging;
 using TodoAppNTier.Business.Mappings.AutoMapper;
+using TodoAppNTier.Dtos.WorkDtos;
+using FluentValidation;
+using TodoAppNTier.Dtos.WorkUpdateDtos;
+using TodoAppNTier.Business.ValidationRules;
 
 namespace TodoAppNTier.Business.DependencyResolvers.Microsoft
 {
@@ -32,6 +36,8 @@ namespace TodoAppNTier.Business.DependencyResolvers.Microsoft
 
             services.AddScoped<IUow, Uow>();
             services.AddScoped<IWorkService, WorkService>();
+            services.AddTransient<IValidator<WorkCreateDto>, WorkCreateDtoValidator>();
+            services.AddTransient<IValidator<WorkUpdateDto>, WorkUpdateDtoValidator>();
         }
 
 

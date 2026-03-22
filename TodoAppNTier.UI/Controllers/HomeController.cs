@@ -49,7 +49,7 @@ public class HomeController : Controller
 
         public async Task<IActionResult> Update(int id)
         {
-            var dto = await _workService.GetById(id);
+            var dto = await _workService.GetById<WorkUpdateDto>(id);
            
             
                 return View(new WorkUpdateDto
@@ -75,7 +75,7 @@ public class HomeController : Controller
             return View(dto);
         }
 
-        public async Task <IActionResult> Delete (int id)
+        public async Task <IActionResult> Remove (int id)
         {
             await _workService.Remove(id);
             return RedirectToAction("Index");

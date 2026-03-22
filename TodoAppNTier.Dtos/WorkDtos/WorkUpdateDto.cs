@@ -1,8 +1,9 @@
 using System.ComponentModel.DataAnnotations;
+using TodoAppNTier.Business.Mappings.AutoMapper;
 
 namespace TodoAppNTier.Dtos.WorkUpdateDtos
 {
-    public class WorkUpdateDto
+    public class WorkUpdateDto : IDto
     {
   
         [Range(1, int.MaxValue, ErrorMessage = "Geçersiz Id değeri.")]

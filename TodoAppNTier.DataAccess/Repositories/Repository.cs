@@ -39,9 +39,13 @@ namespace TodoAppNTier.DataAccess.Repositories
 
         }
 
-        public void Remove(T entity)
+        public void Remove(object id)
         {
-           _context.Set<T>().Remove(entity);
+            var deletedEntity = _context.Set<T>().Find(id);
+            if (deletedEntity != null) // Silinecek var mı kontrolü yapıldı
+            {
+                _context.Set<T>().Remove(deletedEntity);
+            }
         }
 
       public async Task<T> GetByFilter(Expression<Func<T, bool>> filter, bool asNoTracking = false)
@@ -56,9 +60,14 @@ namespace TodoAppNTier.DataAccess.Repositories
             _context.Set<T>().Update(entity);
         }
 
-        void IRepository<T>.Remove(T entity)
+        void IRepository<T>.Remove(object id)
         {
-            throw new NotImplementedException();
+            var deletedEntity = _context.Set<T>().Find(id);
+            if (deletedEntity != null) // Silinecek var mı kontrolü yapıldı
+            {
+                _context.Set<T>().Remove(deletedEntity);
+            }
+           
         }
 
         public IQueryable<T> GetQuery()

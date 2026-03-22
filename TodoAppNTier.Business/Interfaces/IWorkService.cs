@@ -10,9 +10,9 @@ namespace TodoAppNTier.Business.Interfaces
 
       Task Create (WorkCreateDto Dto);
 
-      Task <WorkListDto> GetById(int id);
+      Task <IDto> GetById<IDto>(int id);
 
-      Task Remove(object id);
+      Task Remove(int id);
 
 
       Task Update(WorkUpdateDto Dto);

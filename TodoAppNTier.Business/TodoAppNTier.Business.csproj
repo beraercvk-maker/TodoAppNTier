@@ -3,6 +3,7 @@
   <ItemGroup>
     <ProjectReference Include="..\TodoAppNTier.DataAccess\TodoAppNTier.DataAccess.csproj" />
     <ProjectReference Include="..\TodoAppNTier.Dtos\TodoAppNTier.Dtos.csproj" />
+    <ProjectReference Include="..\TodoAppNTier.Common\TodoAppNTier.Common.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,11 +1,13 @@
 using AutoMapper;
 using FluentValidation;
 using TodoAppNTier.Business.Interfaces;
-using TodoAppNTier.Business.Mappings.AutoMapper;
+using TodoAppNTier.Common.ResponseObjects;
 using TodoAppNTier.DataAccess.UnitofWork;
 using TodoAppNTier.Dtos.WorkDtos;
 using TodoAppNTier.Dtos.WorkUpdateDtos;
 using TodoAppNTier.Entities.Concrete;
+using TodoAppNTier.Business.Extensions;
+
 
 namespace TodoAppNTier.Services.WorkService
 {
@@ -26,54 +28,69 @@ namespace TodoAppNTier.Services.WorkService
 
         }
 
-        public async Task Create(WorkCreateDto Dto)
+        public async Task<IResponse> Create(WorkCreateDto dto)
         {
-            var validationResult = _createValidator.Validate(Dto);
+            var validationResult = _createValidator.Validate(dto);
             
-            if (validationResult.IsValid)
+            if (validationResult.IsValid) // Eğer doğrulama başarılı ise
             {
-                  await _uow.GetRepository<Work>().Create(_mapper.Map<Work>(Dto));
-            await _uow.SaveChanges();
+                await _uow.GetRepository<Work>().Create(_mapper.Map<Work>(dto)); // DTO'yu Entity'e çevirip veritabanına ekliyoruz
+                await _uow.SaveChanges();
+                return new Response(ResponseType.Success); 
             }
-            
+
+            var errors = validationResult.GetErrorMessages();
+            return new Response(ResponseType.ValidationError, errors);
         }
 
-        public async Task<List<WorkListDto>> GetAll()
+        public async Task<IResponse<List<WorkListDto>>> GetAll()
         {
-            return _mapper.Map<List<WorkListDto>>(await _uow.GetRepository<Work>().GetAll());
+            var data = _mapper.Map<List<WorkListDto>>(await _uow.GetRepository<Work>().GetAll());
+            return new Response<List<WorkListDto>>(ResponseType.Success, data);
         }
 
-        public async Task<IDto> GetById<IDto>(int id)
+        public async Task<IResponse<IDto>> GetById<IDto>(int id)
         {
-            return _mapper.Map<IDto>(await _uow.GetRepository<Work>().GetByFilter(x => x.Id == id));
-        }
-
-        public async Task Remove(int id)
-        {
-           _uow.GetRepository<Work>().Remove(id);
-            await _uow.SaveChanges();
-        }
-
-        public async Task Update(WorkUpdateDto Dto)
-        {
-            var result = _updateValidator.Validate(Dto);
-            
-            if (result.IsValid) 
+            var data = _mapper.Map<IDto>(await _uow.GetRepository<Work>().GetByFilter(x => x.Id == id));
+            if (data == null)
             {
-                // 1. Veritabanından "orijinal" (unchanged) veriyi bulup getiriyoruz.
-                // Artık bu görevi Service üstlendi, Repository veritabanını boş yere yormayacak!
-                var unchanged = await _uow.GetRepository<Work>().GetById(Dto.Id);
+                return new Response<IDto>(ResponseType.NotFound, "İlgili veri bulunamadı.");
+            }
+            return new Response<IDto>(ResponseType.Success, data);
+        }
 
-                if (unchanged != null) // Ufak bir güvenlik: Ya böyle bir görev yoksa?
+        public async Task<IResponse> Remove(int id)
+        {
+            var removedEntity = await _uow.GetRepository<Work>().GetByFilter(x => x.Id == id);
+            if (removedEntity != null)
+            {
+                _uow.GetRepository<Work>().Remove(removedEntity);
+                await _uow.SaveChanges();
+                return new Response(ResponseType.Success);
+            }
+            return new Response(ResponseType.NotFound, "İlgili kayıt bulunamadı.");
+        }
+
+        public async Task<IResponse> Update(WorkUpdateDto dto)
+        {
+            var result = _updateValidator.Validate(dto); // DTO'nun doğrulamasını yapıyoruz
+            
+            if (result.IsValid) // Eğer doğrulama başarılı ise
+            {
+                var unchanged = await _uow.GetRepository<Work>().GetById(dto.Id);
+
+                if (unchanged != null) 
                 {
-                    // 2. Formdan gelen güncel DTO'yu, AutoMapper ile "yeni" veriye (entity) çeviriyoruz.
-                    var entity = _mapper.Map<Work>(Dto);
-
-                    // 3. İki paketi birden Repository'deki o iki parametreli, performanslı metodumuza gönderiyoruz!
+                    var entity = _mapper.Map<Work>(dto);
                     _uow.GetRepository<Work>().Update(entity, unchanged);
                     await _uow.SaveChanges();
+                    return new Response(ResponseType.Success);
                 }
+                return new Response(ResponseType.NotFound, "Güncellenecek kayıt bulunamadı.");
             }
+
+            var errors = result.GetErrorMessages();
+            return new Response(ResponseType.ValidationError, errors);
         }
     }
 }

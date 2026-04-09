@@ -12,5 +12,8 @@ namespace TodoAppNTier.Dtos.WorkUpdateDtos
         [Required(ErrorMessage = "Görev tanımı boş geçilemez.")]
         public string Definition { get; set; }
         public bool IsCompleted { get; set; }
+
+
+        public int AppUserId { get; set; }
     }
 }

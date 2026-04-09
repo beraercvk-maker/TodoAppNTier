@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using TodoAppNTier.Entities.Concrete;
-
+using TodoAppNTier.DataAccess.Contexts;
 namespace TodoAppNTier.DataAccess
 {
     public class TodoContextFactory : IDesignTimeDbContextFactory<TodoContext>

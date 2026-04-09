@@ -2,7 +2,7 @@ using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using TodoAppNTier.DataAccess.Interfaces;
 using TodoAppNTier.Entities.Concrete;
-
+using TodoAppNTier.DataAccess.Contexts;
 namespace TodoAppNTier.DataAccess.Repositories
 {
     public class Repository<T> : IRepository<T> where T : BaseEntity

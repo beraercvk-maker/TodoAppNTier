@@ -1,101 +1,123 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Identity.Client;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity; // KULLANICILAR İÇİN EKLENDİ
 using TodoAppNTier.Business.Interfaces;
 using TodoAppNTier.Common.ResponseObjects;
 using TodoAppNTier.Dtos.WorkDtos;
 using TodoAppNTier.Dtos.WorkUpdateDtos;
 using TodoAppNTier.Entities.Concrete;
-using TodoAppNTier.Services.WorkService;
-using TodoAppNTier.UI.Models;
 using TodoAppNTier.UI.Extensions;
 
-namespace TodoAppNTier.UI.Controllers;
-
-public class HomeController : Controller
+namespace TodoAppNTier.UI.Controllers
 {
-    private readonly IWorkService _workService;
-
-    public HomeController(IWorkService workService)
+    [Authorize] // 1. GÜVENLİK KİLİDİ: Ziyaretçiler giremez!
+    public class HomeController : Controller
     {
-        _workService = workService;
-    }
+        private readonly IWorkService _workService;
+        private readonly UserManager<AppUser> _userManager; // 2. KULLANICI UZMANI EKLENDİ
 
-    public async Task<IActionResult> Index()
-    {
+        public HomeController(IWorkService workService, UserManager<AppUser> userManager)
+        {
+            _workService = workService;
+            _userManager = userManager;
+        }
 
+        public async Task<IActionResult> Index()
+        {
+            // A) O an giriş yapan kişiyi sistemden çek
+            var user = await _userManager.FindByNameAsync(User.Identity.Name);
 
+            // B) Bütün görevleri getir
+            var response = await _workService.GetAll();
 
-     var response = await  _workService.GetAll();
-        return this.ResponseView(response);
-    }
+            // C) SADECE BU KULLANICIYA AİT OLANLARI FİLTRELE (Başkalarının görevlerini gizle)
+            if (response.ResponseType == ResponseType.Success && response.Data != null)
+            {
+                response.Data = response.Data.Where(x => x.AppUserId == user.Id).ToList();
+            }
 
+            return this.ResponseView(response);
+        }
 
-    public IActionResult Create()
-    {
-        return View(new WorkCreateDto());
-    }
+        public IActionResult Create()
+        {
+            return View(new WorkCreateDto());
+        }
 
-
-    [HttpPost]
+        [HttpPost]
         public async Task<IActionResult> Create(WorkCreateDto dto)
         {
+            // A) Görevi ekleyen kişiyi bul
+            var user = await _userManager.FindByNameAsync(User.Identity.Name);
+            
+            // B) Görevi o kişiye zimmetle! (Veritabanına "Sahibi Budur" diyoruz)
+            dto.AppUserId = user.Id;
+
             var response = await _workService.Create(dto);
             
-            // DÜZELTME 2: Hata varsa form verilerini (dto) silmeden geri döndür.
             if (response.ResponseType == ResponseType.ValidationError)
                 return this.ResponseViewError(response, dto);
 
-            // Başarılıysa Index'e git
             return this.ResponseRedirectToAction(response, "Index");
         }
 
+        [HttpGet]
+        public async Task<IActionResult> Update(int id)
+        {
+            var response = await _workService.GetById<WorkUpdateDto>(id);
+            var user = await _userManager.FindByNameAsync(User.Identity.Name);
 
-       [HttpGet]
-    public async Task<IActionResult> Update(int id)
-    {
-        // 1. Service katmanı AutoMapper sayesinde bize zaten içi dolu, makyajlı bir DTO gönderiyor.
-        var response = await _workService.GetById<WorkUpdateDto>(id);
-        
-        return this.ResponseView(response);
-    }
+            // GÜVENLİK (IDOR Koruması): Başkasının görev ID'sini yazarak açmaya çalışırsa engelle!
+            if (response.ResponseType == ResponseType.Success && response.Data.AppUserId != user.Id)
+            {
+                return RedirectToAction("Index"); // Çaktırmadan anasayfaya geri yolla
+            }
 
-        [HttpPost]
+            return this.ResponseView(response);
+        }
 
         [HttpPost]
         public async Task<IActionResult> Update(WorkUpdateDto dto)
         {
+            // Hacklenmemek için Update ederken kullanıcının ID'sini zorla kendimiz basıyoruz
+            var user = await _userManager.FindByNameAsync(User.Identity.Name);
+            dto.AppUserId = user.Id;
+
             var response = await _workService.Update(dto);
             
-            // Hata varsa hataları basıp DTO'yu geri dön
             if (response.ResponseType == ResponseType.ValidationError)
                 return this.ResponseViewError(response, dto);
 
-            // NotFound veya Başarılı durumlarını tek satırda hallet
             return this.ResponseRedirectToAction(response, "Index");
         }
 
-        public async Task <IActionResult> Remove (int id)
+        public async Task<IActionResult> Remove(int id)
         {
+            // Silinmek istenen görevi ve o anki kullanıcıyı bul
+            var response = await _workService.GetById<WorkListDto>(id);
+            var user = await _userManager.FindByNameAsync(User.Identity.Name);
 
-            
-          var response = await _workService.Remove(id);
+            // GÜVENLİK: Eğer görev başkasına aitse silmesine KESİNLİKLE izin verme!
+            if (response.ResponseType == ResponseType.Success && response.Data.AppUserId != user.Id)
+            {
+                return RedirectToAction("Index"); 
+            }
 
-          if (response.ResponseType == ResponseType.NotFound)
-    {
-        TempData["ErrorMessage"] = response.Message; // "Silinmek istenen görev bulunamadı."
-        return NotFound(); // 404 sayfasına yönlendir
-    }
+            var removeResponse = await _workService.Remove(id);
 
+            if (removeResponse.ResponseType == ResponseType.NotFound)
+            {
+                TempData["ErrorMessage"] = removeResponse.Message; 
+                return NotFound(); 
+            }
             
             return RedirectToAction("Index");
-         }
+        }
 
-
-    public IActionResult PageNotFound()
-{
-    return View();
-}
-
-
+        public IActionResult PageNotFound()
+        {
+            return View();
+        }
+    }
 }

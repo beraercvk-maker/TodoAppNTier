@@ -1,0 +1,57 @@
+@model TodoAppNTier.Dtos.AppUserDtos.UserRegisterDto
+@{
+    ViewData["Title"] = "Kayıt Ol";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-lg border-0 rounded-lg mt-5">
+                <div class="card-header bg-primary text-white text-center py-4">
+                    <h3 class="font-weight-light my-2">Hesap Oluştur</h3>
+                </div>
+                <div class="card-body p-5">
+                    
+                    @* Eğer Controller'dan bir hata dönerse (Örn: Şifre çok kısa) burada kırmızıyla yazacak *@
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3 font-weight-bold"></div>
+
+                    <form asp-action="Register" asp-controller="Account" method="post">
+                        
+                        <div class="form-floating mb-3">
+                            <input asp-for="Username" class="form-control" placeholder="Kullanıcı Adı" required />
+                            <label asp-for="Username">Kullanıcı Adı</label>
+                            <span asp-validation-for="Username" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input asp-for="Email" type="email" class="form-control" placeholder="name@example.com" required />
+                            <label asp-for="Email">Email Adresi</label>
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3 mb-md-0">
+                                    <input asp-for="Password" type="password" class="form-control" placeholder="Şifre" required />
+                                    <label asp-for="Password">Şifre</label>
+                                    <span asp-validation-for="Password" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3 mb-md-0">
+                                    <input asp-for="ConfirmPassword" type="password" class="form-control" placeholder="Şifreyi Doğrula" required />
+                                    <label asp-for="ConfirmPassword">Şifreyi Doğrula</label>
+                                    <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 mb-0 text-center">
+                            <button type="submit" class="btn btn-primary btn-lg w-100">Kayıt Ol <i class="bi bi-person-plus"></i></button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

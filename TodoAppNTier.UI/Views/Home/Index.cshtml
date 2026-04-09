@@ -1,64 +1,74 @@
 ﻿@model List<TodoAppNTier.Dtos.WorkDtos.WorkListDto>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-    <title>Todo App</title> 
-    <link href="/node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
-</head>
-<body> 
-   
+@{
+    ViewData["Title"] = "Görevlerim";
+}
+
+<div class="container mt-5">
     
-    <div class="container my-5">
-        <div class="text-end">
-            <a asp-action="Create" asp-controller="Home" class="btn btn-primary m-3">Yeni Görev Ekle</a>
-        </div>
-        <h2 class="text-center text-primary mb-4">Yapılacaklar Listesi</h2>
-        
-        <table class="table table-bordered table-striped table-hover shadow-sm">
-            <thead class="table-dark">
-                <tr>
-                    <th>Görev Tanımı</th>
-                    <th>Durum</th>
-                    <th>İşlem</th>
-                </tr>
-            </thead>
-            <tbody>
-                @* Veritabanından gelen Model'i döngüye sokuyoruz *@
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-primary fw-bold">
+            <i class="bi bi-list-check me-2"></i>Yapılacaklar
+        </h2>
+        <a asp-action="Create" asp-controller="Home" class="btn btn-primary rounded-pill px-4 py-2 shadow-sm fw-bold">
+            <i class="bi bi-plus-lg me-1"></i> Yeni Görev Ekle
+        </a>
+    </div>
+
+    <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+        <div class="card-body p-0">
+            <ul class="list-group list-group-flush">
+                
                 @if (Model != null && Model.Count > 0)
                 {
                     foreach (var work in Model)
                     {
-                        <tr>
-                            <td>@work.Definition</td>
-                            <td>
+                        <li class="list-group-item d-flex justify-content-between align-items-center p-4 transition-hover border-bottom">
+                            
+                            <div class="d-flex align-items-center">
                                 @if(work.IsCompleted)
                                 {
-                                    <span class="badge bg-success">Tamamlandı</span>
+                                    <i class="bi bi-check-circle-fill text-success fs-4 me-3 shadow-sm rounded-circle"></i>
+                                    <span class="fs-5 text-muted text-decoration-line-through fst-italic">@work.Definition</span>
                                 }
                                 else
                                 {
-                                    <span class="badge bg-warning text-dark">Devam Ediyor</span>
+                                    <i class="bi bi-circle text-secondary fs-4 me-3"></i>
+                                    <span class="fs-5 fw-medium text-dark">@work.Definition</span>
                                 }
-                            </td>
-                            <td>
-                                <a asp-action="Update" asp-controller="Home" asp-route-id="@work.Id" class="btn btn-sm btn-outline-primary">Düzenle</a>
-                                <a asp-action="Remove" asp-controller="Home" asp-route-id="@work.Id" class="btn btn-sm btn-outline-danger">Sil</a>
-                            </td>
+                            </div>
 
-                        </tr>
-                    } 
+                            <div class="btn-group shadow-sm rounded-pill">
+                                <a asp-action="Update" asp-controller="Home" asp-route-id="@work.Id" class="btn btn-sm btn-outline-primary px-3 py-2">
+                                    <i class="bi bi-pencil-square"></i> Düzenle
+                                </a>
+                                <a asp-action="Remove" asp-controller="Home" asp-route-id="@work.Id" class="btn btn-sm btn-outline-danger px-3 py-2">
+                                    <i class="bi bi-trash3"></i> Sil
+                                </a>
+                            </div>
+
+                        </li>
+                    }
                 }
                 else
                 {
-                    <tr>
-                        <td colspan="3" class="text-center text-muted">
-                            Henüz bir görev eklenmemiş.
-                        </td>
-                    </tr>
+                    <div class="text-center py-5 text-muted bg-light">
+                        <i class="bi bi-inbox fs-1 d-block mb-3 text-secondary opacity-50"></i>
+                        <h4 class="fw-light">Harika, yapılacak işin kalmamış!</h4>
+                        <p class="mb-0 mt-2 small">"Yeni Görev Ekle" butonuna tıklayarak güne başlayabilirsin.</p>
+                    </div>
                 }
-            </tbody>
-        </table>
+                
+            </ul>
+        </div>
     </div>
+</div>
 
-</body>
-</html>
+<style>
+    .transition-hover {
+        transition: background-color 0.3s ease;
+    }
+    .transition-hover:hover {
+        background-color: #f8f9fa !important;
+    }
+</style>

@@ -1,0 +1,84 @@
+@model List<TodoAppNTier.Entities.Concrete.Work>
+@{
+    ViewData["Title"] = "Sistemdeki Tüm Görevler";
+}
+
+<div class="container mt-5">
+    
+    <div class="card shadow-sm border-0 rounded-4 mb-4 bg-light">
+        <div class="card-body p-4">
+            <form asp-action="AllWorks" method="get" class="row g-3 align-items-end">
+                
+                <div class="col-md-6">
+                    <label class="form-label fw-bold text-muted small"><i class="bi bi-search"></i> Görev veya Kullanıcı Ara</label>
+                    <input type="text" name="searchString" value="@ViewBag.CurrentSearch" class="form-control rounded-pill px-4" placeholder="Örn: Rapor hazırla, admin, mehmet..." autocomplete="off">
+                </div>
+                
+                <div class="col-md-4">
+                    <label class="form-label fw-bold text-muted small"><i class="bi bi-funnel"></i> Durum Filtresi</label>
+                    <select name="statusFilter" class="form-select rounded-pill px-4">
+                        <option value="" selected="@(string.IsNullOrEmpty(ViewBag.CurrentFilter) ? "selected" : null)">Tümü (Kaldır)</option>
+                        <option value="completed" selected="@(ViewBag.CurrentFilter == "completed" ? "selected" : null)">Sadece Bitenler</option>
+                        <option value="pending" selected="@(ViewBag.CurrentFilter == "pending" ? "selected" : null)">Sadece Bekleyenler</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-2 d-grid gap-2 d-md-flex">
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm w-100">Filtrele</button>
+                    <a asp-action="AllWorks" class="btn btn-outline-secondary rounded-pill px-4 w-100">Temizle</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+        <div class="card-header bg-dark text-warning p-4 d-flex justify-content-between align-items-center">
+            <h3 class="mb-0 fw-bold"><i class="bi bi-eye me-2"></i> Sistem İzleme</h3>
+            <span class="badge bg-warning text-dark fs-6 rounded-pill px-3 py-2">Eşleşen: @Model.Count</span>
+        </div>
+        
+        <div class="card-body p-0">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4 py-3">Sahibi</th>
+                        <th>Görev İçeriği</th>
+                        <th class="text-center">Durum</th>
+                        <th class="text-end pe-4">İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if(Model.Count == 0)
+                    {
+                        <tr><td colspan="4" class="text-center py-5 text-muted">Arama kriterlerinize uyan hiçbir görev bulunamadı.</td></tr>
+                    }
+                    @foreach (var work in Model)
+                    {
+                        <tr>
+                            <td class="ps-4 fw-bold">
+                                <i class="bi bi-person-badge text-muted me-2"></i> 
+                                @(work.AppUser != null ? work.AppUser.UserName : "Bilinmiyor")
+                            </td>
+                            <td>@work.Definition</td>
+                            <td class="text-center">
+                                @if (work.IsCompleted)
+                                {
+                                    <span class="badge bg-success bg-opacity-10 text-success border border-success rounded-pill px-3"><i class="bi bi-check2"></i> Bitti</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning bg-opacity-10 text-warning border border-warning rounded-pill px-3"><i class="bi bi-hourglass-split"></i> Bekliyor</span>
+                                }
+                            </td>
+                            <td class="text-end pe-4">
+                                <a asp-action="DeleteWork" asp-route-id="@work.Id" class="btn btn-sm btn-outline-danger px-3 py-2" onclick="return confirm('Silmek istediğinize emin misiniz?')">
+                                    <i class="bi bi-trash3"></i> Sil
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
